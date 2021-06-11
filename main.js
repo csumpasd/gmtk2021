@@ -50,40 +50,34 @@ function updateGame() {
   htmlUpdate();
 }
 
+
+// display keys in html
 function htmlUpdate() {
   if ( held[wasdKeys[0]] ) {
-    document.getElementById('w').innerHTML = "w = true"
+    document.getElementById('w').innerHTML = "w"
   }
   else {
-    document.getElementById('w').innerHTML = "w = false"
+    document.getElementById('w').innerHTML = ""
   }
   if ( held[wasdKeys[1]] ) {
-    document.getElementById('a').innerHTML = "a = true"
+    document.getElementById('a').innerHTML = "a"
   }
   else {
-    document.getElementById('a').innerHTML = "a = false"
+    document.getElementById('a').innerHTML = ""
   }
   if ( held[wasdKeys[2]] ) {
-    document.getElementById('s').innerHTML = "s = true"
+    document.getElementById('s').innerHTML = "s"
   }
   else {
-    document.getElementById('s').innerHTML = "s = false"
+    document.getElementById('s').innerHTML = ""
   }
   if ( held[wasdKeys[3]] ) {
-    document.getElementById('d').innerHTML = "d = true"
+    document.getElementById('d').innerHTML = "d"
   }
   else {
-    document.getElementById('d').innerHTML = "d = false"
+    document.getElementById('d').innerHTML = ""
   }
 }
-
-
-
-
-
-//hehe
-
-
 
 
 
