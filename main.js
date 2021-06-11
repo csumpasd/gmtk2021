@@ -2,50 +2,53 @@ const CW = 800;
 const CH = 450;
 
 const wasdKeys = [87, 65, 83, 68]; //wasd keycodes for use with heldK
+const arrowKeys = [38, 37, 40, 39];
 
 
 // called on body load
 function init() {
-  redPlayer = new player(10, 50, 50, 50, wasdKeys);
-  bluePlayer = new player( //TODO ide valamit );
+  redPlayer = new player(10, 50, 50, 50, wasdKeys, "red");
+  bluePlayer = new player(10, 150, 50, 50, arrowKeys, "blue");
   gameArea.init();
 }
 
 // define player
-function player(x, y, width, height, keys) {
+function player(x, y, width, height, keys, color) {
   this.x = x;
   this.y = y;
   this.width = width;
   this.height = height;
   this.keys = keys;
 
-  this.move = function() {
-    if (held[this.keys[0]]) {
-      this.y -= 2;
-    }
-    if (held[this.keys[1]]) {
-      this.x -= 2;
-    }
-    if (held[this.keys[2]]) {
-      this.y += 2;
-    }
-    if (held[this.keys[3]]) {
-      this.x += 2;
-    }
-  };
-
-  this.draw = function() {
-    gameArea.context.fillStyle = "white";
+  this.update = function() {
+    movePlayer(this);
+    gameArea.context.fillStyle = color;
     gameArea.context.fillRect(this.x, this.y, this.width, this.height);
   };
 }
 
+function movePlayer(playerToMove) {
+    if (held[playerToMove.keys[0]]) {
+      playerToMove.y -= 2;
+    }
+    if (held[playerToMove.keys[1]]) {
+      playerToMove.x -= 2;
+    }
+    if (held[playerToMove.keys[2]]) {
+      playerToMove.y += 2;
+    }
+    if (held[playerToMove.keys[3]]) {
+      playerToMove.x += 2;
+    }
+}
+
+
 // called every frame
 function updateGame() {
   gameArea.clear();
-  player.move();
-  player.draw();
-  htmlUpdate();
+  redPlayer.update();
+  bluePlayer.update();
+  showKeysInHtml();
 }
 
 // create gamearea and canvas
@@ -72,26 +75,48 @@ let gameArea = {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // display keys in html
-function htmlUpdate() {
+function showKeysInHtml() {
   if ( held[wasdKeys[0]] ) {
     document.getElementById('w').innerHTML = "w"
   }
   else {
     document.getElementById('w').innerHTML = ""
   }
+
+
   if ( held[wasdKeys[1]] ) {
     document.getElementById('a').innerHTML = "a"
   }
   else {
     document.getElementById('a').innerHTML = ""
   }
+
+
   if ( held[wasdKeys[2]] ) {
     document.getElementById('s').innerHTML = "s"
   }
   else {
     document.getElementById('s').innerHTML = ""
   }
+
+
   if ( held[wasdKeys[3]] ) {
     document.getElementById('d').innerHTML = "d"
   }
