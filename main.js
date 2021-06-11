@@ -1,4 +1,5 @@
 const gameObstacleSpeed = 2;
+const playerSpeed = 5;
 
 const wasdKeys = [87, 65, 83, 68]; //wasd keycodes for use with heldK
 const arrowKeys = [38, 37, 40, 39];
@@ -18,9 +19,45 @@ function player(x, y, diameter, keys, color) {
   this.y = y;
   this.d = diameter;
   this.keys = keys;
+  this.dir = 0;
+  this.vel = 0;
 
   this.update = function() {
     //movement
+    let forceX = 0;
+    let forceY = 0;
+
+    if ( held[this.keys[0]] ) {
+      forceY -= 1;
+    }
+    if ( held[this.keys[1]] ) {
+      forceX -= 1;
+    }
+    if ( held[this.keys[2]] ) {
+      forceY += 1;
+    }
+    if ( held[this.keys[3]] ) {
+      forceX += 1;
+    }
+
+    let forceLength = Math.sqrt(Math.pow(forceX, 2) + Math.pow(forceY, 2));
+    if (forceX != 0) {
+      forceX /= forceLength;
+    }
+    if (forceY != 0) {
+      forceY /= forceLength;
+    }
+
+    forceX *= playerSpeed;
+    forceY *= playerSpeed;
+
+
+
+
+
+    this.x += forceX;
+    this.y += forceY;
+
 
     //drawing
     let ctx = gameArea.context;
@@ -54,8 +91,8 @@ function gameLoop() {
 
   // create new obstacles, 1-n chance of obstacle/frame
   if (Math.random() > 0.99) {
-    let obstacleX = Math.floor(Math.random() * (gameArea.canvas.width - 30));
-    gameObstacles.push(new obstacle(obstacleX, 100, 30, 10, "white"));
+    let obstacleX = Math.floor(Math.random() * (gameArea.canvas.width - 150));
+    gameObstacles.push(new obstacle(obstacleX, 0, 150, 25, "white"));
   }
 
   // go through every obstacle to move & draw it
