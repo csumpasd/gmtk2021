@@ -4,14 +4,15 @@ const CH = 450;
 const wasdKeys = [87, 65, 83, 68]; //wasd keycodes for use with heldK
 
 
-
+// called on body load
 function init() {
-  player = new character(10, 50, 50, 50, wasdKeys);
+  redPlayer = new player(10, 50, 50, 50, wasdKeys);
+  bluePlayer = new player( //TODO ide valamit );
   gameArea.init();
 }
 
-
-function character(x, y, width, height, keys) {
+// define player
+function player(x, y, width, height, keys) {
   this.x = x;
   this.y = y;
   this.width = width;
@@ -31,10 +32,7 @@ function character(x, y, width, height, keys) {
     if (held[this.keys[3]]) {
       this.x += 2;
     }
-}
-
-
-
+  };
 
   this.draw = function() {
     gameArea.context.fillStyle = "white";
@@ -42,6 +40,15 @@ function character(x, y, width, height, keys) {
   };
 }
 
+// called every frame
+function updateGame() {
+  gameArea.clear();
+  player.move();
+  player.draw();
+  htmlUpdate();
+}
+
+// create gamearea and canvas
 let gameArea = {
   canvas : document.createElement("canvas"),
   init : function() {
@@ -60,12 +67,7 @@ let gameArea = {
   }
 };
 
-function updateGame() {
-  gameArea.clear();
-  player.move();
-  player.draw();
-  htmlUpdate();
-}
+
 
 
 
