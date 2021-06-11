@@ -1,53 +1,69 @@
-const CW = 800;
-const CH = 450;
+const gameObstacleSpeed = 2;
 
 const wasdKeys = [87, 65, 83, 68]; //wasd keycodes for use with heldK
 const arrowKeys = [38, 37, 40, 39];
 
+let gameObstacles = [];
 
 // called on body load
 function init() {
-  redPlayer = new player(10, 50, 50, 50, wasdKeys, "red");
-  bluePlayer = new player(10, 150, 50, 50, arrowKeys, "blue");
+  playerRed = new player(10, 50, 50, wasdKeys, "red");
+  playerBlue = new player(10, 150, 50, arrowKeys, "blue");
   gameArea.init();
 }
 
-// define player
-function player(x, y, width, height, keys, color) {
+
+function player(x, y, diameter, keys, color) {
+  this.x = x;
+  this.y = y;
+  this.d = diameter;
+  this.keys = keys;
+
+  this.update = function() {
+    //movement
+
+    //drawing
+    let ctx = gameArea.context;
+    ctx.beginPath();
+    ctx.arc(this.x+(this.d / 2), this.y+(this.d / 2), (this.d / 2), 0, 2 * Math.PI);
+    ctx.fillStyle = color;
+    ctx.fill();
+  };
+}
+
+
+
+function obstacle(x, y, width, height, color) {
   this.x = x;
   this.y = y;
   this.width = width;
   this.height = height;
-  this.keys = keys;
 
-  this.update = function() {
-    movePlayer(this);
+  this.draw = function() {
     gameArea.context.fillStyle = color;
     gameArea.context.fillRect(this.x, this.y, this.width, this.height);
-  };
-}
-
-function movePlayer(playerToMove) {
-    if (held[playerToMove.keys[0]]) {
-      playerToMove.y -= 2;
-    }
-    if (held[playerToMove.keys[1]]) {
-      playerToMove.x -= 2;
-    }
-    if (held[playerToMove.keys[2]]) {
-      playerToMove.y += 2;
-    }
-    if (held[playerToMove.keys[3]]) {
-      playerToMove.x += 2;
-    }
+  }
 }
 
 
 // called every frame
-function updateGame() {
+function gameLoop() {
   gameArea.clear();
-  redPlayer.update();
-  bluePlayer.update();
+  playerRed.update();
+  playerBlue.update();
+
+  // create new obstacles, 1-n chance of obstacle/frame
+  if (Math.random() > 0.99) {
+    let obstacleX = Math.floor(Math.random() * (gameArea.canvas.width - 30));
+    gameObstacles.push(new obstacle(obstacleX, 100, 30, 10, "white"));
+  }
+
+  // go through every obstacle to move & draw it
+  for (i = 0; i < gameObstacles.length; i += 1) {
+    gameObstacles[i].y += gameObstacleSpeed;
+    gameObstacles[i].draw();
+  }
+
   showKeysInHtml();
 }
 
@@ -55,13 +71,13 @@ function updateGame() {
 let gameArea = {
   canvas : document.createElement("canvas"),
   init : function() {
-    this.canvas.width = CW;
-    this.canvas.height = CH;
+    this.canvas.width = window.innerWidth;
+    this.canvas.height = window.innerHeight - 50;
 
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 
-    this.interval = setInterval(updateGame, 10);
+    this.interval = setInterval(gameLoop, 10);
 
   },
   clear : function() {
