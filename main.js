@@ -6,23 +6,38 @@ const wasdKeys = [87, 65, 83, 68]; //wasd keycodes for use with heldK
 
 
 function init() {
-  negyzet = new rectt(10, 50, 50, 50, "black");
+  player = new character(10, 50, 50, 50, wasdKeys);
   gameArea.init();
 }
 
 
-function rectt(x, y, width, height, color) {
+function character(x, y, width, height, keys) {
   this.x = x;
   this.y = y;
   this.width = width;
   this.height = height;
+  this.keys = keys;
 
   this.move = function() {
+    if (held[this.keys[0]]) {
+      this.y -= 2;
+    }
+    if (held[this.keys[1]]) {
+      this.x -= 2;
+    }
+    if (held[this.keys[2]]) {
+      this.y += 2;
+    }
+    if (held[this.keys[3]]) {
+      this.x += 2;
+    }
+}
 
-  }
+
+
 
   this.draw = function() {
-    gameArea.context.fillStyle = color;
+    gameArea.context.fillStyle = "white";
     gameArea.context.fillRect(this.x, this.y, this.width, this.height);
   };
 }
@@ -40,15 +55,19 @@ let gameArea = {
 
   },
   clear : function() {
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    this.context.fillStyle = "#1f2023";
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 };
 
 function updateGame() {
   gameArea.clear();
-  negyzet.draw();
+  player.move();
+  player.draw();
   htmlUpdate();
 }
+
+
 
 
 // display keys in html
