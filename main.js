@@ -166,7 +166,24 @@ function cow(x, y, size) {
       this.grav = 0;
     }
 
+<<<<<<< HEAD
     let ctx = gameArea.context;
+=======
+  // go through every obstacle to move & draw it
+  for (i = 0; i < gameObstacles.length; i += 1) {
+    gameObstacles[i].y += gameObstacleSpeed;
+    gameObstacles[i].draw();
+  }
+
+}
+//Math.floor(Math.random() *
+// create gamearea and canvas
+let gameArea = {
+  canvas : document.createElement("canvas"),
+  init : function() {
+    this.canvas.width = window.innerWidth - 1;
+    this.canvas.height = window.innerHeight - 1;
+>>>>>>> f92518dbdf2184b6fb22533a4e31cb27370b52a2
 
     ctx.strokeStyle = 'white';
 
