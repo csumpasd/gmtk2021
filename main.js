@@ -9,7 +9,7 @@ const saucerWidth = 100;
 const saucerRatio = 754/538;
 const saucerHeight = saucerWidth / saucerRatio;
 
-const cowWidth = 50;
+const cowWidth = 75;
 const cowRatio = 160/102;
 const cowHeight = cowWidth / cowRatio;
 
@@ -41,7 +41,7 @@ let gameArea = {
 
   },
   clear : function() {
-    this.context.fillStyle = "#1f2023";
+    this.context.fillStyle = "#00B5E2";
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 };
@@ -132,8 +132,19 @@ function saucer(x, y, keys) {
     this.y += this.vy;
 
     testIfOutOfBounds(this);
+    let ctx = gameArea.context;
     let saucerImg = document.getElementById("saucer");
-    gameArea.context.drawImage(saucerImg, playerSaucer.x, playerSaucer.y, saucerWidth, saucerHeight);
+
+    if ( playerCow.y - playerSaucer.yc >= -5 ) {
+      ctx.save();
+      ctx.translate(playerSaucer.xc,playerSaucer.yc);
+      ctx.rotate(playerCow.dir + Math.PI / 2);
+      ctx.drawImage(saucerImg, -saucerWidth/2, -saucerHeight/2, saucerWidth, saucerHeight);
+      ctx.restore();
+    }
+    else {
+      ctx.drawImage(saucerImg, playerSaucer.x, playerSaucer.y, saucerWidth, saucerHeight);
+    }
   }
 }
 
@@ -160,7 +171,7 @@ function cow(x, y) {
     this.dir = Math.atan2(dirY, dirX);
     let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.xc - playerCow.xc, 2) + Math.pow(playerSaucer.yc - playerCow.yc, 2)));
 
-    if ( ( saucerDistance <= 300 ) && ( saucerDistance >= 100 ) && ( playerCow.y - playerSaucer.yc >= 50 ) ) {
+    if ( ( saucerDistance <= 300 ) && ( saucerDistance >= 70 ) && ( playerCow.y - playerSaucer.yc >= 15 ) ) {
         this.vel = 2 * saucerDistance/100;
         this.beam = true;
     }
@@ -189,16 +200,16 @@ function cow(x, y) {
     if ( this.beam == 1 ) {
       ctx.strokeStyle = 'red';
     }
-    ctx.lineWidth = 5;
-    ctx.beginPath();
-    ctx.moveTo(playerCow.x + playerCow.width/2, playerCow.y + playerCow.height/2);
-    ctx.lineTo(playerCow.x + playerCow.width/2 + Math.cos(this.dir) * 100, playerCow.y + playerCow.height/2 + Math.sin(this.dir) * 100);
-    ctx.stroke();
+    // ctx.lineWidth = 5;
+    // ctx.beginPath();
+    // ctx.moveTo(playerCow.x + playerCow.width/2, playerCow.y + playerCow.height/2);
+    // ctx.lineTo(playerCow.x + playerCow.width/2 + Math.cos(this.dir) * 100, playerCow.y + playerCow.height/2 + Math.sin(this.dir) * 100);
+    // ctx.stroke();
 
 
     let scaredCowImg = document.getElementById("scared_cow");
     let cowImg = document.getElementById("cow");
-    if ( saucerDistance <= 300 ) {
+    if ( ( saucerDistance <= 300 ) && ( playerCow.y - playerSaucer.yc >= -5 ) ) {
       gameArea.context.drawImage(scaredCowImg, playerCow.x, playerCow.y, cowWidth, cowHeight);
     }
     else {
