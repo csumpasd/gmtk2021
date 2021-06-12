@@ -6,7 +6,7 @@ const friction = 0.985;
 const frameLength = 10;
 
 const saucerWidth = 100;
-const saucerRatio = 754/538;
+const saucerRatio = 754/1381;
 const saucerHeight = saucerWidth / saucerRatio;
 
 const cowWidth = 75;
@@ -41,7 +41,7 @@ let gameArea = {
 
   },
   clear : function() {
-    this.context.fillStyle = "#00B5E2";
+    this.context.fillStyle = "#60a5ea";
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 };
