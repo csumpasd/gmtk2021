@@ -23,6 +23,7 @@ function player(x, y, diameter, keys, color) {
   this.vel = 0;
 
   this.update = function() {
+
     //movement
     let forceX = 0;
     let forceY = 0;
@@ -58,6 +59,65 @@ function player(x, y, diameter, keys, color) {
     this.x += forceX;
     this.y += forceY;
 
+
+
+    if (this.x <= 0) {
+      this.x = 0;
+    }
+    if (this.y <= 0) {
+      this.y = 0;
+    }
+    if (this.x + this.d >= gameArea.canvas.width) {
+      this.x = gameArea.canvas.width - this.d;
+    }
+    if (this.y + this.d >= gameArea.canvas.height) {
+      this.y = gameArea.canvas.height - this.d;
+    }
+
+
+
+    if (this == playerRed) {
+      if ( Math.sqrt(Math.pow(playerRed.x - playerBlue.x, 2) + Math.pow(playerRed.y - playerBlue.y, 2)) >= 200) {
+        if (playerRed.y > playerBlue.y) {
+          playerRed.y -= playerSpeed;
+        }
+        if (playerRed.y < playerBlue.y) {
+          playerRed.y += playerSpeed;
+        }
+        if (playerRed.x > playerBlue.x) {
+          playerRed.x -= playerSpeed;
+        }
+        if (playerRed.x < playerBlue.x) {
+          playerRed.x += playerSpeed;
+        }
+
+      }
+    }
+
+    if (this == playerBlue) {
+      if ( Math.sqrt(Math.pow(playerRed.x - playerBlue.x, 2) + Math.pow(playerRed.y - playerBlue.y, 2)) >= 200) {
+        if (playerBlue.y > playerRed.y) {
+          playerBlue.y -= playerSpeed;
+        }
+        if (playerBlue.y < playerRed.y) {
+          playerBlue.y += playerSpeed;
+        }
+        if (playerBlue.x > playerRed.x) {
+          playerBlue.x -= playerSpeed;
+        }
+        if (playerBlue.x < playerRed.x) {
+          playerBlue.x += playerSpeed;
+        }
+
+      }
+    }
+
+    // if (this == playerBlue) {
+    //   if ( Math.sqrt(Math.pow(playerRed.x - playerBlue.x, 2) + Math.pow(playerRed.y - playerBlue.y, 2)) >= 200) {
+    //     playerRed.x += forceX;
+    //     playerRed.y += forceY;
+    //   }
+    // }
 
     //drawing
     let ctx = gameArea.context;
@@ -101,15 +161,19 @@ function gameLoop() {
     gameObstacles[i].draw();
   }
 
+
+
   showKeysInHtml();
 }
+
+
 
 // create gamearea and canvas
 let gameArea = {
   canvas : document.createElement("canvas"),
   init : function() {
     this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight - 50;
+    this.canvas.height = window.innerHeight;
 
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -122,62 +186,6 @@ let gameArea = {
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// display keys in html
-function showKeysInHtml() {
-  if ( held[wasdKeys[0]] ) {
-    document.getElementById('w').innerHTML = "w"
-  }
-  else {
-    document.getElementById('w').innerHTML = ""
-  }
-
-
-  if ( held[wasdKeys[1]] ) {
-    document.getElementById('a').innerHTML = "a"
-  }
-  else {
-    document.getElementById('a').innerHTML = ""
-  }
-
-
-  if ( held[wasdKeys[2]] ) {
-    document.getElementById('s').innerHTML = "s"
-  }
-  else {
-    document.getElementById('s').innerHTML = ""
-  }
-
-
-  if ( held[wasdKeys[3]] ) {
-    document.getElementById('d').innerHTML = "d"
-  }
-  else {
-    document.getElementById('d').innerHTML = ""
-  }
-}
-
 
 
 let held = []; // index is keycode, value is boolean storing if that key is pressed
