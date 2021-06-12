@@ -140,8 +140,8 @@ function gameLoop() {
 let gameArea = {
   canvas : document.createElement("canvas"),
   init : function() {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight - 50;
+    this.canvas.width = window.innerWidth - 1;
+    this.canvas.height = window.innerHeight - 1;
 
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
