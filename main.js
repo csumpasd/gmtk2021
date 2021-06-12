@@ -22,8 +22,8 @@ let currentSide = 0;
 // called on body load
 function init() {
   playerSaucer = new saucer(window.innerWidth/2 - saucerWidth/2 , 300, wasdKeys);
-  playerCow = new cow(window.innerWidth/2 - cowWidth/2, window.innerHeight * 0.9 - cowHeight/2);
-  gameArea.init();
+  playerCow = new cow(window.innerWidth/2 - cowWidth/2, window.innerHeight * 0.9 -700 - cowHeight/2);
+  gameArea.init();  ///////////////////////////////////////////////////////////////////////////////////
 }
 
 
@@ -73,6 +73,8 @@ function gameLoop() {
 function saucer(x, y, keys) {
   this.x = x;
   this.y = y;
+  this.xc = x + saucerWidth/2; // horizontal center
+  this.yc = y + saucerHeight/2; // vertical center
   this.width = saucerWidth;
   this.height = saucerHeight;
   this.keys = keys;
@@ -80,6 +82,9 @@ function saucer(x, y, keys) {
   this.vy = 0;
 
   this.update = function() {
+
+    this.xc = this.x + saucerWidth/2;
+    this.yc = this.y + saucerHeight/2;
 
     let forceX = 0;
     let forceY = 0;
@@ -136,6 +141,8 @@ function saucer(x, y, keys) {
 function cow(x, y) {
   this.x = x;
   this.y = y;
+  this.xc = this.x + cowWidth/2; // horizontal center
+  this.yc = this.y + cowHeight/2; // vertical center
   this.width = cowWidth;
   this.height = cowHeight;
   this.dir = 0;
@@ -145,12 +152,15 @@ function cow(x, y) {
 
   this.update = function() {
 
-    let dirX = (playerSaucer.x + playerSaucer.width/2 - playerCow.x - playerCow.width/2) * 0.5;
-    let dirY = (playerSaucer.y + playerSaucer.height/2 - playerCow.y - playerCow.height/2) * 0.5;
-    this.dir = Math.atan2(dirY, dirX);
-    let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.x - playerCow.x, 2) + Math.pow(playerSaucer.y - playerCow.y, 2)));
+    this.xc = this.x + cowWidth/2;
+    this.yc = this.y + cowHeight/2;
 
-    if ( ( saucerDistance <= 300 ) && ( saucerDistance >= 100 ) && ( playerCow.y - playerSaucer.y >= 50 ) ) {
+    let dirX = (playerSaucer.xc - playerCow.xc) * 0.5;
+    let dirY = (playerSaucer.yc - playerCow.yc) * 0.5;
+    this.dir = Math.atan2(dirY, dirX);
+    let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.xc - playerCow.xc, 2) + Math.pow(playerSaucer.yc - playerCow.yc, 2)));
+
+    if ( ( saucerDistance <= 300 ) && ( saucerDistance >= 100 ) && ( playerCow.y - playerSaucer.yc >= 50 ) ) {
         this.vel = 2 * saucerDistance/100;
         this.beam = true;
     }
@@ -185,9 +195,16 @@ function cow(x, y) {
     ctx.lineTo(playerCow.x + playerCow.width/2 + Math.cos(this.dir) * 100, playerCow.y + playerCow.height/2 + Math.sin(this.dir) * 100);
     ctx.stroke();
 
-    testIfOutOfBounds(this);
+
+    let scaredCowImg = document.getElementById("scared_cow");
     let cowImg = document.getElementById("cow");
-    gameArea.context.drawImage(cowImg, playerCow.x, playerCow.y, cowWidth, cowHeight);
+    if ( saucerDistance <= 300 ) {
+      gameArea.context.drawImage(scaredCowImg, playerCow.x, playerCow.y, cowWidth, cowHeight);
+    }
+    else {
+      gameArea.context.drawImage(cowImg, playerCow.x, playerCow.y, cowWidth, cowHeight);
+    }
+
     //drawCircle(this);
   }
 }
@@ -206,15 +223,19 @@ function drawCircle(thingie) {
 function testIfOutOfBounds(thingie) {
   if (thingie.x <= 0) {
     thingie.x = 0;
+    thingie.vx = 0;
   }
   if (thingie.y <= 0) {
     thingie.y = 0;
+    thingie.vy = 0;
   }
   if (thingie.x + thingie.width >= gameArea.canvas.width) {
     thingie.x = gameArea.canvas.width - thingie.width;
+    thingie.vx = 0;
   }
   if (thingie.y + thingie.height >= gameArea.canvas.height) {
     thingie.y = gameArea.canvas.height - thingie.height;
+    thingie.vy = 0;
   }
 }
 
