@@ -1,7 +1,7 @@
 const obstacleSpeed = 2;
 const obstacleWidth = 150;
-const playerSpeed = 8;
-const playerAccel = 0.2;
+const playerSpeed = 10;
+const playerAccel = 0.3;
 const friction = 0.985;
 const frameLength = 10;
 
@@ -26,8 +26,8 @@ function init() {
 let gameArea = {
   canvas : document.createElement("canvas"),
   init : function() {
-    this.canvas.width = window.innerWidth - 1;
-    this.canvas.height = window.innerHeight - 1;
+    this.canvas.width = window.innerWidth - window.innerWidth * 0.02;
+    this.canvas.height = window.innerHeight - window.innerWidth * 0.02;
 
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -132,6 +132,8 @@ function cow(x, y, size) {
   this.size = size;
   this.dir = 0;
   this.vel = 0;
+  this.grav = 0;
+  this.beam = false;
 
   this.update = function() {
 
@@ -141,25 +143,34 @@ function cow(x, y, size) {
     let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.x - playerCow.x, 2) + Math.pow(playerSaucer.y - playerCow.y, 2)));
 
     if ( ( saucerDistance <= 300 ) && ( saucerDistance >= 100 ) && ( playerCow.y - playerSaucer.y >= 50 ) ) {
-        this.vel = 1;
+        this.vel = 2 * saucerDistance/100;
+        this.beam = true;
     }
     else {
       this.vel /= 1.1;
+      this.beam = false;
     }
 
-    
+
     let velX = this.vel * Math.cos(this.dir);
     let velY = this.vel * Math.sin(this.dir);
 
     this.x += velX;
     this.y += velY;
 
+    if ( this.beam == false ) {
+      this.grav += 0.05;
+      this.y += this.grav;
+    }
+    else {
+      this.grav = 0;
+    }
 
     let ctx = gameArea.context;
 
     ctx.strokeStyle = 'white';
 
-    if ( this.vel == 1 ) {
+    if ( this.beam == 1 ) {
       ctx.strokeStyle = 'red';
     }
     ctx.lineWidth = 5;
@@ -211,8 +222,13 @@ function obstacle(x, y, width, height, color) {
   }
 }
 
-
-
+// TODO eztmegcsinalni
+function ground(x, y, height) {
+  this.x = x;
+  this.y = y;
+  this.width =
+  this.height = height;
+}
 
 let held = []; // index is keycode, value is boolean storing if that key is pressed
 
