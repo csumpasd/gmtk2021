@@ -1,33 +1,81 @@
 const gameObstacleSpeed = 2;
-const playerSpeed = 5;
+const playerSpeed = 8;
+const playerAccel = 0.2;
+const friction = 0.985;
+const frameLength = 10;
+
+const saucerSize = 50;
+const cowSize = 30;
 
 const wasdKeys = [87, 65, 83, 68]; //wasd keycodes for use with heldK
 const arrowKeys = [38, 37, 40, 39];
 
 let gameObstacles = [];
+let currentFrame = 0;
 
 // called on body load
 function init() {
-  playerRed = new player(10, 50, 50, wasdKeys, "red");
-  playerBlue = new player(10, 150, 50, arrowKeys, "blue");
+  playerSaucer = new saucer(window.innerWidth/2 - saucerSize/2 , 300, saucerSize, wasdKeys);
+  playerCow = new cow(window.innerWidth/2 - cowSize/2, window.innerHeight * 0.9 - cowSize/2, cowSize);
   gameArea.init();
 }
 
 
-function player(x, y, diameter, keys, color) {
+// create gamearea and canvas
+let gameArea = {
+  canvas : document.createElement("canvas"),
+  init : function() {
+    this.canvas.width = window.innerWidth - 1;
+    this.canvas.height = window.innerHeight - 1;
+
+    this.context = this.canvas.getContext("2d");
+    document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+
+    this.interval = setInterval(gameLoop, frameLength);
+
+  },
+  clear : function() {
+    this.context.fillStyle = "#1f2023";
+    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
+  }
+};
+
+
+// called every frame
+function gameLoop() {
+  gameArea.clear();
+  playerSaucer.update();
+  playerCow.update();
+
+  // create new obstacles, 1-n chance of obstacle/frame
+  if (Math.random() > 0.99) {
+    let obstacleX = Math.floor(Math.random() * (gameArea.canvas.width - 150));
+    gameObstacles.push(new obstacle(obstacleX, 0, 150, 25, "white"));
+  }
+
+  // go through every obstacle to move & draw it
+  for (i = 0; i < gameObstacles.length; i += 1) {
+    gameObstacles[i].y += gameObstacleSpeed;
+    gameObstacles[i].draw();
+  }
+
+  currentFrame += 1;
+}
+
+
+function saucer(x, y, size, keys) {
   this.x = x;
   this.y = y;
-  this.d = diameter;
+  this.size = size;
   this.keys = keys;
-  this.dir = 0;
-  this.vel = 0;
+  this.vx = 0;
+  this.vy = 0;
 
   this.update = function() {
 
-    //movement
     let forceX = 0;
     let forceY = 0;
-
+    // test for held keys
     if ( held[this.keys[0]] ) {
       forceY -= 1;
     }
@@ -41,93 +89,112 @@ function player(x, y, diameter, keys, color) {
       forceX += 1;
     }
 
+    // normalize force vector
     let forceLength = Math.sqrt(Math.pow(forceX, 2) + Math.pow(forceY, 2));
-    if (forceX != 0) {
+    if ( forceX != 0 ) {
       forceX /= forceLength;
     }
-    if (forceY != 0) {
+    if ( forceY != 0 ) {
       forceY /= forceLength;
     }
 
-    forceX *= playerSpeed;
-    forceY *= playerSpeed;
-
-
-
-
-
-    this.x += forceX;
-    this.y += forceY;
-
-
-
-    if (this.x <= 0) {
-      this.x = 0;
+    // apply force to character
+    if ( ( forceY < 0 ) && ( this.vy > -playerSpeed ) ){
+      this.vy -= playerAccel;
     }
-    if (this.y <= 0) {
-      this.y = 0;
+    if ( ( forceX < 0 ) && ( this.vx > -playerSpeed ) ){
+      this.vx -= playerAccel;
     }
-    if (this.x + this.d >= gameArea.canvas.width) {
-      this.x = gameArea.canvas.width - this.d;
+    if ( ( forceY > 0 ) && ( this.vy < playerSpeed ) ){
+      this.vy += playerAccel;
     }
-    if (this.y + this.d >= gameArea.canvas.height) {
-      this.y = gameArea.canvas.height - this.d;
+    if ( ( forceX > 0 ) && ( this.vx < playerSpeed ) ){
+      this.vx += playerAccel;
     }
 
+    this.vx *= friction;
+    this.vy *= friction;
 
+    this.x += this.vx;
+    this.y += this.vy;
 
-    if (this == playerRed) {
-      if ( Math.sqrt(Math.pow(playerRed.x - playerBlue.x, 2) + Math.pow(playerRed.y - playerBlue.y, 2)) >= 200) {
-        if (playerRed.y > playerBlue.y) {
-          playerRed.y -= playerSpeed;
-        }
-        if (playerRed.y < playerBlue.y) {
-          playerRed.y += playerSpeed;
-        }
-        if (playerRed.x > playerBlue.x) {
-          playerRed.x -= playerSpeed;
-        }
-        if (playerRed.x < playerBlue.x) {
-          playerRed.x += playerSpeed;
-        }
-
-      }
-    }
-
-    if (this == playerBlue) {
-      if ( Math.sqrt(Math.pow(playerRed.x - playerBlue.x, 2) + Math.pow(playerRed.y - playerBlue.y, 2)) >= 200) {
-        if (playerBlue.y > playerRed.y) {
-          playerBlue.y -= playerSpeed;
-        }
-        if (playerBlue.y < playerRed.y) {
-          playerBlue.y += playerSpeed;
-        }
-        if (playerBlue.x > playerRed.x) {
-          playerBlue.x -= playerSpeed;
-        }
-        if (playerBlue.x < playerRed.x) {
-          playerBlue.x += playerSpeed;
-        }
-
-      }
-    }
-
-    // if (this == playerBlue) {
-    //   if ( Math.sqrt(Math.pow(playerRed.x - playerBlue.x, 2) + Math.pow(playerRed.y - playerBlue.y, 2)) >= 200) {
-    //     playerRed.x += forceX;
-    //     playerRed.y += forceY;
-    //   }
-    // }
-
-    //drawing
-    let ctx = gameArea.context;
-    ctx.beginPath();
-    ctx.arc(this.x+(this.d / 2), this.y+(this.d / 2), (this.d / 2), 0, 2 * Math.PI);
-    ctx.fillStyle = color;
-    ctx.fill();
-  };
+    testIfOutOfBounds(this);
+    drawCircle(this);
+  }
 }
 
+
+function cow(x, y, size) {
+  this.x = x;
+  this.y = y;
+  this.size = size;
+  this.dir = 0;
+  this.vel = 0;
+
+  this.update = function() {
+
+    let dirX = (playerSaucer.x + playerSaucer.size/2 - playerCow.x - playerCow.size/2) * 0.5;
+    let dirY = (playerSaucer.y + playerSaucer.size/2 - playerCow.y - playerCow.size/2) * 0.5;
+    this.dir = Math.atan2(dirY, dirX);
+    let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.x - playerCow.x, 2) + Math.pow(playerSaucer.y - playerCow.y, 2)));
+
+    if ( ( saucerDistance <= 300 ) && ( saucerDistance >= 100 ) && ( playerCow.y - playerSaucer.y >= 50 ) ) {
+        this.vel = 1;
+    }
+    else {
+      this.vel /= 1.1;
+    }
+
+
+    let velX = this.vel * Math.cos(this.dir);
+    let velY = this.vel * Math.sin(this.dir);
+
+    this.x += velX;
+    this.y += velY;
+
+
+    let ctx = gameArea.context;
+
+    ctx.strokeStyle = 'white';
+
+    if ( this.vel == 1 ) {
+      ctx.strokeStyle = 'red';
+    }
+    ctx.lineWidth = 5;
+    ctx.beginPath();
+    ctx.moveTo(playerCow.x + playerCow.size/2, playerCow.y + playerCow.size/2);
+    ctx.lineTo(playerCow.x + playerCow.size/2 + Math.cos(this.dir) * 100, playerCow.y + playerCow.size/2 + Math.sin(this.dir) * 100);
+    ctx.stroke();
+
+    testIfOutOfBounds(this);
+    drawCircle(this);
+  }
+}
+
+
+function drawCircle(thingie) {
+  let ctx = gameArea.context;
+  ctx.beginPath();
+  ctx.arc(thingie.x+(thingie.size / 2), thingie.y+(thingie.size / 2), (thingie.size / 2), 0, 2 * Math.PI);
+  ctx.fillStyle = "white";
+  ctx.fill();
+}
+
+
+function testIfOutOfBounds(thingie) {
+  if (thingie.x <= 0) {
+    thingie.x = 0;
+  }
+  if (thingie.y <= 0) {
+    thingie.y = 0;
+  }
+  if (thingie.x + thingie.size >= gameArea.canvas.width) {
+    thingie.x = gameArea.canvas.width - thingie.size;
+  }
+  if (thingie.y + thingie.size >= gameArea.canvas.height) {
+    thingie.y = gameArea.canvas.height - thingie.size;
+  }
+}
 
 
 function obstacle(x, y, width, height, color) {
@@ -143,49 +210,6 @@ function obstacle(x, y, width, height, color) {
 }
 
 
-// called every frame
-function gameLoop() {
-  gameArea.clear();
-  playerRed.update();
-  playerBlue.update();
-
-  // create new obstacles, 1-n chance of obstacle/frame
-  if (Math.random() > 0.99) {
-    let obstacleX = Math.floor(Math.random() * (gameArea.canvas.width - 150));
-    gameObstacles.push(new obstacle(obstacleX, 0, 150, 25, "white"));
-  }
-
-  // go through every obstacle to move & draw it
-  for (i = 0; i < gameObstacles.length; i += 1) {
-    gameObstacles[i].y += gameObstacleSpeed;
-    gameObstacles[i].draw();
-  }
-
-
-
-  showKeysInHtml();
-}
-
-
-
-// create gamearea and canvas
-let gameArea = {
-  canvas : document.createElement("canvas"),
-  init : function() {
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
-
-    this.context = this.canvas.getContext("2d");
-    document.body.insertBefore(this.canvas, document.body.childNodes[0]);
-
-    this.interval = setInterval(gameLoop, 10);
-
-  },
-  clear : function() {
-    this.context.fillStyle = "#1f2023";
-    this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
-  }
-};
 
 
 let held = []; // index is keycode, value is boolean storing if that key is pressed
@@ -203,3 +227,38 @@ window.addEventListener("keyup",
     changeType = "u";
   },
 false);
+
+
+// this.fAngle = Math.atan2(forceY, forceX);
+// this.force = forceLength;
+//
+//
+// let vNewX = this.velocity * Math.cos(this.vAngle) + this.force * Math.cos(this.fAngle) * playerAccel;// - 0.1 * this.velocity * Math.cos(this.vAngle + Math.pi);
+// let vNewY = this.velocity * Math.sin(this.vAngle) + this.force * Math.sin(this.fAngle) * playerAccel;// - 0.1 * this.velocity * Math.sin(this.vAngle + Math.pi);
+//
+//
+// let vNewLength = Math.sqrt(Math.pow(vNewX, 2) + Math.pow(vNewY, 2));
+// if (vNewX != 0) {
+//   vNewX /= vNewLength;
+// }
+// if (vNewY != 0) {
+//   vNewY /= vNewLength;
+// }
+// vNewLength = Math.sqrt(Math.pow(vNewX, 2) + Math.pow(vNewY, 2));
+//
+// this.vAngle = Math.atan2(vNewY, vNewX);
+// if ( this.velocity < playerSpeed ) {
+//   this.velocity += vNewLength;
+// }
+//
+// this.x += this.velocity * Math.cos(this.vAngle);
+// this.y += this.velocity * Math.sin(this.vAngle);
+
+
+
+
+
+
+
+    // Math.sqrt(Math.pow(playerUFO.x - playerCow.x, 2) + Math.pow(playerUFO.y - playerCow.y, 2))
+    // playerCow.x + playerUFO.d/2 + (playerUFO.x - playerCow.x) * 0.5;
