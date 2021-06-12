@@ -5,9 +5,13 @@ const playerAccel = 0.3;
 const friction = 0.985;
 const frameLength = 10;
 
-const saucerWidth = 100;
-const saucerRatio = 754/1381;
+const saucerWidth = 120;
+const saucerRatio = 754/538
 const saucerHeight = saucerWidth / saucerRatio;
+const beamRatio = 754/1381;
+const beamHeight = saucerHeight / 538 * 1381;
+const beamRotateCenter = 242/1381 * saucerHeight;
+const beamSegment = 122/1381 * saucerHeight;
 
 const cowWidth = 75;
 const cowRatio = 160/102;
@@ -62,7 +66,7 @@ function gameLoop() {
   }
 
   // go through every obstacle to move & draw it
-  for (i = 0; i < gameObstacles.length; i += 1) {
+  for ( i = 0; i < gameObstacles.length; i += 1 ) {
     gameObstacles[i].y += obstacleSpeed;
     gameObstacles[i].draw();
   }
@@ -133,17 +137,34 @@ function saucer(x, y, keys) {
 
     testIfOutOfBounds(this);
     let ctx = gameArea.context;
-    let saucerImg = document.getElementById("saucer");
+    let saucerImgOff = document.getElementById("saucer");
+    let beamImages = [];
+    for ( i = 1; i <= 7; i += 1 ) {
+      beamImages[i] = "saucer_on_" + i*2;
+    }
 
-    if ( playerCow.y - playerSaucer.yc >= -5 ) {
+    let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.xc - playerCow.xc, 2) + Math.pow(playerSaucer.yc - playerCow.yc, 2)));
+    if ( ( playerCow.y - playerSaucer.yc >= -5 ) && ( saucerDistance <= 300 ) ) {
+      // ctx.save();
+      // ctx.translate(playerSaucer.xc,playerSaucer.yc);
+      // ctx.rotate(playerCow.dir + Math.PI / 2);
+      // ctx.drawImage(saucerImgOff, -saucerWidth/2, -saucerHeight/2, saucerWidth, saucerHeight);
+      // ctx.restore();
+
+
+      let beamImgId = "saucer" + Math.floor( ( saucerDistance - 60 ) / beamSegment / 2) * 2;
+      let beamImg = document.getElementById(beamImgId);
+      //
+      // console.log(beamImgId, beamImg);
+
       ctx.save();
       ctx.translate(playerSaucer.xc,playerSaucer.yc);
       ctx.rotate(playerCow.dir + Math.PI / 2);
-      ctx.drawImage(saucerImg, -saucerWidth/2, -saucerHeight/2, saucerWidth, saucerHeight);
+      ctx.drawImage(beamImg, -saucerWidth/2, -saucerHeight/2, saucerWidth, beamHeight);
       ctx.restore();
     }
     else {
-      ctx.drawImage(saucerImg, playerSaucer.x, playerSaucer.y, saucerWidth, saucerHeight);
+      ctx.drawImage(saucerImgOff, playerSaucer.x, playerSaucer.y, saucerWidth, saucerHeight);
     }
   }
 }
