@@ -1,0 +1,57 @@
+
+// this.fAngle = Math.atan2(forceY, forceX);
+// this.force = forceLength;
+//
+//
+// let vNewX = this.velocity * Math.cos(this.vAngle) + this.force * Math.cos(this.fAngle) * playerAccel;// - 0.1 * this.velocity * Math.cos(this.vAngle + Math.pi);
+// let vNewY = this.velocity * Math.sin(this.vAngle) + this.force * Math.sin(this.fAngle) * playerAccel;// - 0.1 * this.velocity * Math.sin(this.vAngle + Math.pi);
+//
+//
+// let vNewLength = Math.sqrt(Math.pow(vNewX, 2) + Math.pow(vNewY, 2));
+// if (vNewX != 0) {
+//   vNewX /= vNewLength;
+// }
+// if (vNewY != 0) {
+//   vNewY /= vNewLength;
+// }
+// vNewLength = Math.sqrt(Math.pow(vNewX, 2) + Math.pow(vNewY, 2));
+//
+// this.vAngle = Math.atan2(vNewY, vNewX);
+// if ( this.velocity < playerSpeed ) {
+//   this.velocity += vNewLength;
+// }
+//
+// this.x += this.velocity * Math.cos(this.vAngle);
+// this.y += this.velocity * Math.sin(this.vAngle);
+
+
+
+
+
+
+
+    // Math.sqrt(Math.pow(playerUFO.x - playerCow.x, 2) + Math.pow(playerUFO.y - playerCow.y, 2))
+    // playerCow.x + playerUFO.d/2 + (playerUFO.x - playerCow.x) * 0.5;
+
+
+
+    // create new obstacles
+    // if (currentFrame % 60 == 0 && x == false) {
+    //
+    //   if (obstacleX >= (gameArea.canvas.width / 2)) {
+    //     x = true;
+    //   } else if (obstacleX < (gameArea.canvas.width / 2)) {
+    //     x = false;
+    //   }
+    // }
+    // else if (currentFrame % 60 == 0 && x == true){
+    //   let obstacleX = Math.floor(Math.random() * ((gameArea.canvas.width - obstacleWidth) - gameArea.canvas.width / 2));
+    //   gameObstacles.push(new obstacle(obstacleX, 0, obstacleWidth, 25, "white"));
+    //
+    //   if (obstacleX >= (gameArea.canvas.width / 2 + obstacleWidth)) {
+    //     x = true;
+    //   } else if (obstacleX < (gameArea.canvas.width / 2)) {
+    //     x = false;
+    //   }
+    // }
+    //

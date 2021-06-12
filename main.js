@@ -1,4 +1,5 @@
-const gameObstacleSpeed = 2;
+const obstacleSpeed = 2;
+const obstacleWidth = 150;
 const playerSpeed = 8;
 const playerAccel = 0.2;
 const friction = 0.985;
@@ -7,11 +8,11 @@ const frameLength = 10;
 const saucerSize = 50;
 const cowSize = 30;
 
-const wasdKeys = [87, 65, 83, 68]; //wasd keycodes for use with heldK
-const arrowKeys = [38, 37, 40, 39];
+const wasdKeys = [87, 65, 83, 68]; //wasd keycodes for use with if ( held [] )
 
 let gameObstacles = [];
 let currentFrame = 0;
+let currentSide = 0;
 
 // called on body load
 function init() {
@@ -47,19 +48,20 @@ function gameLoop() {
   playerSaucer.update();
   playerCow.update();
 
-  // create new obstacles, 1-n chance of obstacle/frame
-  if (Math.random() > 0.99) {
-    let obstacleX = Math.floor(Math.random() * (gameArea.canvas.width - 150));
-    gameObstacles.push(new obstacle(obstacleX, 0, 150, 25, "white"));
+  currentFrame += 1;
+
+  if ( currentFrame % 60 == 0 ) {
+    let obstacleX = Math.floor( Math.random() * ( gameArea.canvas.width/2 - obstacleWidth ) );
+    gameObstacles.push( new obstacle( (obstacleX + ( currentSide % 2 * gameArea.canvas.width/2 ) ), -200, obstacleWidth, 25, "white") );
+    currentSide += 1;
   }
 
   // go through every obstacle to move & draw it
   for (i = 0; i < gameObstacles.length; i += 1) {
-    gameObstacles[i].y += gameObstacleSpeed;
+    gameObstacles[i].y += obstacleSpeed;
     gameObstacles[i].draw();
   }
 
-  currentFrame += 1;
 }
 
 
@@ -145,7 +147,7 @@ function cow(x, y, size) {
       this.vel /= 1.1;
     }
 
-
+    
     let velX = this.vel * Math.cos(this.dir);
     let velY = this.vel * Math.sin(this.dir);
 
@@ -227,38 +229,3 @@ window.addEventListener("keyup",
     changeType = "u";
   },
 false);
-
-
-// this.fAngle = Math.atan2(forceY, forceX);
-// this.force = forceLength;
-//
-//
-// let vNewX = this.velocity * Math.cos(this.vAngle) + this.force * Math.cos(this.fAngle) * playerAccel;// - 0.1 * this.velocity * Math.cos(this.vAngle + Math.pi);
-// let vNewY = this.velocity * Math.sin(this.vAngle) + this.force * Math.sin(this.fAngle) * playerAccel;// - 0.1 * this.velocity * Math.sin(this.vAngle + Math.pi);
-//
-//
-// let vNewLength = Math.sqrt(Math.pow(vNewX, 2) + Math.pow(vNewY, 2));
-// if (vNewX != 0) {
-//   vNewX /= vNewLength;
-// }
-// if (vNewY != 0) {
-//   vNewY /= vNewLength;
-// }
-// vNewLength = Math.sqrt(Math.pow(vNewX, 2) + Math.pow(vNewY, 2));
-//
-// this.vAngle = Math.atan2(vNewY, vNewX);
-// if ( this.velocity < playerSpeed ) {
-//   this.velocity += vNewLength;
-// }
-//
-// this.x += this.velocity * Math.cos(this.vAngle);
-// this.y += this.velocity * Math.sin(this.vAngle);
-
-
-
-
-
-
-
-    // Math.sqrt(Math.pow(playerUFO.x - playerCow.x, 2) + Math.pow(playerUFO.y - playerCow.y, 2))
-    // playerCow.x + playerUFO.d/2 + (playerUFO.x - playerCow.x) * 0.5;
