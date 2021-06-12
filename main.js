@@ -5,6 +5,8 @@ const wasdKeys = [87, 65, 83, 68]; //wasd keycodes for use with heldK
 const arrowKeys = [38, 37, 40, 39];
 
 let gameObstacles = [];
+let frame = 0;
+let x = false;
 
 // called on body load
 function init() {
@@ -23,7 +25,6 @@ function player(x, y, diameter, keys, color) {
   this.vel = 0;
 
   this.update = function() {
-
     //movement
     let forceX = 0;
     let forceY = 0;
@@ -59,65 +60,18 @@ function player(x, y, diameter, keys, color) {
     this.x += forceX;
     this.y += forceY;
 
-
-
     if (this.x <= 0) {
       this.x = 0;
+    }
+    if (this.x >= gameArea.canvas.width - this.d) {
+      this.x = gameArea.canvas.width - this.d;
     }
     if (this.y <= 0) {
       this.y = 0;
     }
-    if (this.x + this.d >= gameArea.canvas.width) {
-      this.x = gameArea.canvas.width - this.d;
-    }
-    if (this.y + this.d >= gameArea.canvas.height) {
+    if (this.y >= gameArea.canvas.height - this.d) {
       this.y = gameArea.canvas.height - this.d;
     }
-
-
-
-    if (this == playerRed) {
-      if ( Math.sqrt(Math.pow(playerRed.x - playerBlue.x, 2) + Math.pow(playerRed.y - playerBlue.y, 2)) >= 200) {
-        if (playerRed.y > playerBlue.y) {
-          playerRed.y -= playerSpeed;
-        }
-        if (playerRed.y < playerBlue.y) {
-          playerRed.y += playerSpeed;
-        }
-        if (playerRed.x > playerBlue.x) {
-          playerRed.x -= playerSpeed;
-        }
-        if (playerRed.x < playerBlue.x) {
-          playerRed.x += playerSpeed;
-        }
-
-      }
-    }
-
-    if (this == playerBlue) {
-      if ( Math.sqrt(Math.pow(playerRed.x - playerBlue.x, 2) + Math.pow(playerRed.y - playerBlue.y, 2)) >= 200) {
-        if (playerBlue.y > playerRed.y) {
-          playerBlue.y -= playerSpeed;
-        }
-        if (playerBlue.y < playerRed.y) {
-          playerBlue.y += playerSpeed;
-        }
-        if (playerBlue.x > playerRed.x) {
-          playerBlue.x -= playerSpeed;
-        }
-        if (playerBlue.x < playerRed.x) {
-          playerBlue.x += playerSpeed;
-        }
-
-      }
-    }
-
-    // if (this == playerBlue) {
-    //   if ( Math.sqrt(Math.pow(playerRed.x - playerBlue.x, 2) + Math.pow(playerRed.y - playerBlue.y, 2)) >= 200) {
-    //     playerRed.x += forceX;
-    //     playerRed.y += forceY;
-    //   }
-    // }
 
     //drawing
     let ctx = gameArea.context;
@@ -149,10 +103,29 @@ function gameLoop() {
   playerRed.update();
   playerBlue.update();
 
+  frame++;
+
   // create new obstacles, 1-n chance of obstacle/frame
-  if (Math.random() > 0.99) {
-    let obstacleX = Math.floor(Math.random() * (gameArea.canvas.width - 150));
+  if (frame >= 60 && x == false) {
+    let obstacleX = Math.floor(Math.random() *(gameArea.canvas.width - 150));
     gameObstacles.push(new obstacle(obstacleX, 0, 150, 25, "white"));
+    frame = 0;
+
+    if (obstacleX >= (gameArea.canvas.width / 2)) {
+      x = true;
+    } else if (obstacleX < (gameArea.canvas.width / 2)) {
+      x = false;
+    }
+  } else if (frame >= 60 && x == true){
+    let obstacleX = Math.floor(Math.random() *((gameArea.canvas.width - 150) - gameArea.canvas.width / 2));
+    gameObstacles.push(new obstacle(obstacleX, 0, 150, 25, "white"));
+    frame = 0;
+
+    if (obstacleX >= (gameArea.canvas.width / 2 + 150)) {
+      x = true;
+    } else if (obstacleX < (gameArea.canvas.width / 2)) {
+      x = false;
+    }
   }
 
   // go through every obstacle to move & draw it
@@ -161,19 +134,14 @@ function gameLoop() {
     gameObstacles[i].draw();
   }
 
-
-
-  showKeysInHtml();
 }
-
-
-
+//Math.floor(Math.random() *
 // create gamearea and canvas
 let gameArea = {
   canvas : document.createElement("canvas"),
   init : function() {
     this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    this.canvas.height = window.innerHeight - 50;
 
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -186,6 +154,12 @@ let gameArea = {
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 };
+
+
+
+
+
+
 
 
 let held = []; // index is keycode, value is boolean storing if that key is pressed
