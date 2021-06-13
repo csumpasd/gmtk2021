@@ -13,7 +13,11 @@ const saucerWidth = gameSize * 0.16;
 const saucerRatio = 754/538;
 const saucerHeight = saucerWidth / saucerRatio;
 
+<<<<<<< HEAD
 const cloudWidth = gameSize * 0.12;
+=======
+const cloudWidht = 200;
+>>>>>>> 435ed584168c48098a979188a554ecd06c8d523f
 const cloudRatio = 972/620;
 const cloudHeight = cloudWidth / cloudRatio;
 
