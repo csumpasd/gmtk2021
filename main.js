@@ -40,7 +40,7 @@ let gameFailed = false;
 // called on body load
 function init() {
   playerSaucer = new saucer(gameSize/2 - saucerWidth/2 , 100, wasdKeys);
-  playerCow = new cow(gameSize/2 - cowWidth/2, gameSize * 0.9 - cowHeight/2);
+  playerCow = new cow(gameSize/2 - cowWidth/2, gameSize * 1.4 * 0.99 - cowHeight/2);
   cowField = new ground();
   gameArea.init();
 }
@@ -51,7 +51,7 @@ let gameArea = {
   canvas : document.createElement("canvas"),
   init : function() {
     this.canvas.width = gameSize;
-    this.canvas.height = gameSize;
+    this.canvas.height = gameSize * 1.4;
 
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -119,9 +119,9 @@ function gameLoop() {
     let ctx = gameArea.context;
     ctx.fillStyle = "red";
     ctx.textAlign = "center";
-    ctx.font = "60px Arial";
-    ctx.fillText("You let your cow die", gameArea.canvas.width/2, gameArea.canvas.height/2);
     ctx.font = "30px Arial";
+    ctx.fillText("You let your cow die", gameArea.canvas.width/2, gameArea.canvas.height/2);
+    ctx.font = "20px Arial";
     ctx.fillText("(and also lost the game)", gameArea.canvas.width/2, gameArea.canvas.height/2 + 40);
     clearInterval(gameArea.interval);
   }
@@ -283,8 +283,8 @@ function cow(x, y) {
       this.grav = 0;
     }
 
-    if ( ( this.y >= gameSize * 0.84 ) && (currentFrame <= 160) ) {
-      this.y = gameSize * 0.84;
+    if ( ( this.y >= gameSize * 1.4 * 0.88 ) && (currentFrame <= 160) ) {
+      this.y = gameSize * 1.4 * 0.88;
     }
 
     if ( this.y > gameArea.canvas.height ) {
@@ -306,7 +306,7 @@ function cow(x, y) {
 
     let scaredCowImg = document.getElementById("scared_cow");
     let cowImg = document.getElementById("cow");
-    if ( ( saucerDistance <= 300 ) && ( playerCow.y - playerSaucer.yc >= -5 ) ) {
+    if ( ( saucerDistance <= 300 ) && ( playerCow.y - playerSaucer.yc >= -5 ) && ( this.timeSinceCloud >= beamTimeOut / frameLength * 1000 ) ) {
       gameArea.context.drawImage(scaredCowImg, playerCow.x, playerCow.y, cowWidth, cowHeight);
     }
     else {
