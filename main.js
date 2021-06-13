@@ -1,19 +1,34 @@
+//  ██████╗ ██████╗ ██╗    ██╗███████╗██╗███╗   ██╗██╗████████╗██╗   ██╗
+// ██╔════╝██╔═══██╗██║    ██║██╔════╝██║████╗  ██║██║╚══██╔══╝╚██╗ ██╔╝
+// ██║     ██║   ██║██║ █╗ ██║█████╗  ██║██╔██╗ ██║██║   ██║    ╚████╔╝
+// ██║     ██║   ██║██║███╗██║██╔══╝  ██║██║╚██╗██║██║   ██║     ╚██╔╝
+// ╚██████╗╚██████╔╝╚███╔███╔╝██║     ██║██║ ╚████║██║   ██║      ██║
+//  ╚═════╝ ╚═════╝  ╚══╝╚══╝ ╚═╝     ╚═╝╚═╝  ╚═══╝╚═╝   ╚═╝      ╚═╝
+// created by Géza Szeghy and Márton Csutora
+
 let gameSize = Math.min(880, (0.7 * Math.min(window.innerWidth, window.innerHeight * 0.7)));
 let mooAudio = new Audio("sounds/moo.mp3");
+let loseAudio = new Audio("sounds/lose.mp3");
 
-let obstacleSpeed = 2;
-const obstacleWidth = 150;
+let gameSpeed = 2;
+const gameSpeedUp = 0.05;
+const frameLength = 16.66666;
+const cloudRarity = 15;
+
 const playerSpeed = 20;
 const playerAccel = 0.4;
 const friction = 0.985;
-const frameLength = 16.66666;
-const beamTimeOut = 1;
-const cloudRarity = 15;
-const gameSpeedUp = 0.05;
+const beamTimeOut = 1.2;
+const movementKeys = [87, 65, 83, 68]; //wasd keycodes for use with if ( held [] )
 
 const saucerWidth = gameSize * 0.16;
 const saucerRatio = 754/538;
 const saucerHeight = saucerWidth / saucerRatio;
+
+const cowWidth = gameSize * 0.13;
+const cowRatio = 160/102;
+const cowHeight = cowWidth / cowRatio;
+
 
 const cloudWidth = gameSize * 0.14;
 const cloudRatio = 972/620;
@@ -24,11 +39,7 @@ const beamHeight = saucerHeight / 538 * 1381;
 const beamRotateCenter = 242/1381 * saucerHeight;
 const beamSegment = 122/1381 * saucerHeight * gameSize/720;
 
-const cowWidth = gameSize * 0.13;
-const cowRatio = 160/102;
-const cowHeight = cowWidth / cowRatio;
 
-const wasdKeys = [87, 65, 83, 68]; //wasd keycodes for use with if ( held [] )
 
 let gameObstacles = [];
 let currentFrame = 0;
@@ -41,12 +52,12 @@ let gameFailed = false;
 
 // called on body load
 function init() {
-  playerSaucer = new saucer(gameSize/2 - saucerWidth/2 , 100, wasdKeys);
+  playerSaucer = new saucer(gameSize/2 - saucerWidth/2 , 100, movementKeys);
   playerCow = new cow(gameSize/2 - cowWidth/2, gameSize * 1.4 * 0.99 - cowHeight/2);
   cowField = new ground();
   gameArea.init();
-}
 
+}
 
 // create gamearea and canvas
 let gameArea = {
@@ -65,7 +76,6 @@ let gameArea = {
     this.context.fillRect(0, 0, this.canvas.width, this.canvas.height);
   }
 };
-
 
 // called every frame
 function gameLoop() {
@@ -89,17 +99,16 @@ function gameLoop() {
     ctx.fillStyle = "grey";
     ctx.textAlign = "left";
     ctx.font = "30px Arial";
-    ctx.fillText(Math.floor(currentFrame/10 * obstacleSpeed/10), 10, 35);
-
+    ctx.fillText(Math.floor(currentFrame/10 * gameSpeed/10), 10, 35);
 
     currentFrame += 1;
     playerCow.timeSinceCloud += 1;
 
     if ( currentFrame % 10 == 0 ) {
-      obstacleSpeed += gameSpeedUp;
+      gameSpeed += gameSpeedUp;
     }
 
-    if ( currentFrame % Math.max(1, Math.floor(cloudRarity * 2000 / Math.sqrt(obstacleSpeed) / gameArea.canvas.width) ) == 0 ) {
+    if ( currentFrame % Math.max(1, Math.floor(cloudRarity * 2000 / Math.sqrt(gameSpeed) / gameArea.canvas.width) ) == 0 ) {
 
 
       let randomCloud = Math.ceil(Math.random() * 5);
@@ -117,7 +126,6 @@ function gameLoop() {
       }
     }
 
-
     minDistance = 69420;
     // go through every obstacle to move & draw it
     for ( i = 0; i < gameObstacles.length; i += 1 ) {
@@ -130,15 +138,15 @@ function gameLoop() {
         }
 
         gameObstacles[i].testIfVisible();
-        gameObstacles[i].y += obstacleSpeed;
+        gameObstacles[i].y += gameSpeed;
         gameObstacles[i].draw();
       }
     }
-
   }
 
   if ( gameFailed ) {
     gameAudio.pause();
+    loseAudio.play();
     let ctx = gameArea.context;
     ctx.fillStyle = "red";
     ctx.textAlign = "center";
@@ -147,7 +155,7 @@ function gameLoop() {
     ctx.font = "20px Arial";
     ctx.fillText("(and also lost the game)", gameArea.canvas.width/2, gameArea.canvas.height/2 + 25);
     ctx.font = "18px Arial";
-    ctx.fillText("your final score is: " + Math.floor(currentFrame/10 * obstacleSpeed/10), gameArea.canvas.width/2, gameArea.canvas.height/2 + 48);
+    ctx.fillText("your final score is: " + Math.floor(currentFrame/10 * gameSpeed/10), gameArea.canvas.width/2, gameArea.canvas.height/2 + 48);
 
     clearInterval(gameArea.interval);
   }
@@ -246,6 +254,7 @@ function saucer(x, y, keys) {
       ctx.drawImage(saucerImgOff, playerSaucer.x, playerSaucer.y, saucerWidth, saucerHeight);
     }
   }
+
 }
 
 
@@ -273,14 +282,9 @@ function cow(x, y) {
     let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.xc - playerCow.xc, 2) + Math.pow(playerSaucer.yc - playerCow.yc, 2)));
 
 
-    // if ( gameObstacles.length >= 1 ) {
-    //   testBeamIntersects(gameObstacles[closestObstacle]);
-    // }
-
     if ( ( minDistance <= playerSaucer.width / 2 ) && ( gameStarted ) ) {
       this.timeSinceCloud = 0;
     }
-
 
     if ( ( saucerDistance <= gameSize / 3 ) && ( saucerDistance >= gameSize / 11 ) && ( playerCow.y - playerSaucer.yc >= 15 ) && ( this.timeSinceCloud >= beamTimeOut / frameLength * 1000 ) ) {
         this.vel = 3 * saucerDistance/100;
@@ -293,7 +297,6 @@ function cow(x, y) {
       this.vel /= 1.1;
       this.beam = false;
     }
-
 
     let velX = this.vel * Math.cos(this.dir);
     let velY = this.vel * Math.sin(this.dir);
@@ -338,9 +341,8 @@ function cow(x, y) {
     else {
       gameArea.context.drawImage(cowImg, playerCow.x, playerCow.y, cowWidth, cowHeight);
     }
-
-    //drawCircle(this);
   }
+
 }
 
 
@@ -362,6 +364,7 @@ function testIfOutOfBounds(thingie) {
     thingie.y = gameArea.canvas.height - thingie.height;
     thingie.vy = 0;
   }
+
 }
 
 function obstacle(x, y, width, height, img) {
@@ -384,7 +387,6 @@ function obstacle(x, y, width, height, img) {
 
 }
 
-
 function ground() {
   this.x = 0;
   this.y = gameArea.canvas.height - ( gameArea.canvas.height * 1688 / 2250 );
@@ -395,11 +397,11 @@ function ground() {
     let groundImg = document.getElementById("ground");
     gameArea.context.drawImage(groundImg, this.x, gameArea.canvas.height - gameArea.canvas.width * 1688 / 2250 + currentFrame * gameSize/500, gameArea.canvas.width, (gameArea.canvas.width * 1688 / 2250));
   }
+
 }
 
 
-
-//keyevents
+// keyevents
 let held = []; // index is keycode, value is boolean storing if that key is pressed
 
 window.addEventListener("keydown",
@@ -417,7 +419,7 @@ window.addEventListener("keyup",
 false);
 
 
-
+// loop sounds
 let gameAudio = new Audio("sounds/cowfinity_track.mp3");
 gameAudio.addEventListener("ended", function() {
   this.currentTime = 0;
