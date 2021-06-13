@@ -131,7 +131,7 @@ function gameLoop() {
     ctx.font = "20px Arial";
     ctx.fillText("(and also lost the game)", gameArea.canvas.width/2, gameArea.canvas.height/2 + 25);
     ctx.font = "18px Arial";
-    ctx.fillText("your final score is:" + Math.floor(currentFrame/10 * obstacleSpeed/10), gameArea.canvas.width/2, gameArea.canvas.height/2 + 48);
+    ctx.fillText("your final score is: " + Math.floor(currentFrame/10 * obstacleSpeed/10), gameArea.canvas.width/2, gameArea.canvas.height/2 + 48);
 
     clearInterval(gameArea.interval);
   }
