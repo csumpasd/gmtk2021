@@ -1,12 +1,17 @@
 * {
-  margin: 0;
-  padding: 0;
+  margin: auto;
+  padding: auto;
 }
 
 body, html {
   height:100%;
-  background-color: #25262a;
-
+  background-color: #ffffff;
+  text-align: center;
+  color: #513610;
+}
+#title {
+  display: flex;
+  margin-top: clamp(10px,2%,100px);
 }
 canvas {
     padding: 0;
@@ -17,4 +22,5 @@ canvas {
     bottom: 0;
     left: 0;
     right: 0;
+    border: 10px solid grey;
 }

@@ -1,4 +1,4 @@
-let gameSize = Math.min(1080, (0.7 * Math.min(window.innerWidth, window.innerHeight)));
+let gameSize = Math.min(1440, (0.7 * Math.min(window.innerWidth, window.innerHeight)));
 let obstacleSpeed = 2;
 const obstacleWidth = 150;
 const playerSpeed = 20;
@@ -13,14 +13,14 @@ const saucerWidth = gameSize * 0.16;
 const saucerRatio = 754/538;
 const saucerHeight = saucerWidth / saucerRatio;
 
-const cloudWidth = gameSize * 0.12;
+const cloudWidth = gameSize * 0.14;
 const cloudRatio = 972/620;
 const cloudHeight = cloudWidth / cloudRatio;
 
 const beamRatio = 754/1381;
 const beamHeight = saucerHeight / 538 * 1381;
 const beamRotateCenter = 242/1381 * saucerHeight;
-const beamSegment = 122/1381 * saucerHeight;
+const beamSegment = 122/1381 * saucerHeight * gameSize/720;
 
 const cowWidth = gameSize * 0.13;
 const cowRatio = 160/102;
@@ -41,7 +41,7 @@ function init() {
   playerSaucer = new saucer(gameSize/2 - saucerWidth/2 , 100, wasdKeys);
   playerCow = new cow(gameSize/2 - cowWidth/2, gameSize * 0.9 - cowHeight/2);
   cowField = new ground();
-  gameArea.init();  ///////////////////////////////////////////////////////////////////////////////////TODO
+  gameArea.init();
 }
 
 
@@ -187,12 +187,7 @@ function saucer(x, y, keys) {
     }
 
     let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.xc - playerCow.xc, 2) + Math.pow(playerSaucer.yc - playerCow.yc, 2)));
-    if ( ( playerCow.y - playerSaucer.yc >= -5 ) && ( saucerDistance <= 300 ) && ( playerCow.timeSinceCloud >= beamTimeOut / frameLength * 1000 ) ) {
-      // ctx.save();
-      // ctx.translate(playerSaucer.xc,playerSaucer.yc);
-      // ctx.rotate(playerCow.dir + Math.PI / 2);
-      // ctx.drawImage(saucerImgOff, -saucerWidth/2, -saucerHeight/2, saucerWidth, saucerHeight);
-      // ctx.restore();
+    if ( ( playerCow.y - playerSaucer.yc >= -5 ) && ( saucerDistance <= gameSize/3 ) && ( playerCow.timeSinceCloud >= beamTimeOut / frameLength * 1000 ) ) {
 
 
       let beamImgId = "saucer2"; //if something goes wrong, this should be a backup
