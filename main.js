@@ -82,9 +82,16 @@ function gameLoop() {
 
   // go through every obstacle to move & draw it
   for ( i = 0; i < gameObstacles.length; i += 1 ) {
-    gameObstacles[i].y += obstacleSpeed;
-    gameObstacles[i].draw();
+
+    if ( gameObstacles[i].visible == 1 ) {
+      testIfObstacleVisible(gameObstacles[i]);
+      gameObstacles[i].y += obstacleSpeed;
+      gameObstacles[i].draw();
+    }
+
   }
+
+
 
 }
 
@@ -210,6 +217,10 @@ function cow(x, y) {
     this.dir = Math.atan2(dirY, dirX);
     let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.xc - playerCow.xc, 2) + Math.pow(playerSaucer.yc - playerCow.yc, 2)));
 
+    for ( i = 0; i < gameObstacles.length; i += 1 ) {
+      testBeamIntersects(gameObstacles[i]);
+    }
+
     if ( ( saucerDistance <= 300 ) && ( saucerDistance >= 70 ) && ( playerCow.y - playerSaucer.yc >= 15 ) ) {
         this.vel = 2 * saucerDistance/100;
         this.beam = true;
@@ -270,6 +281,67 @@ function drawCircle(thingie) {
 }
 
 
+function testBeamIntersects(obstacle) {
+  let dirX = (playerSaucer.xc - playerCow.xc) * 0.5;
+  let dirY = (playerSaucer.yc - playerCow.yc) * 0.5;
+  let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.xc - playerCow.xc, 2) + Math.pow(playerSaucer.yc - playerCow.yc, 2)));
+
+
+  let sx = playerSaucer.xc;
+  let sy = playerSaucer.yc;
+
+  let cx = playerCow.xc;
+  let cy = playerCow.yc;
+
+  // 1 2
+  // 3 4
+  let ox1 = obstacle.x;
+  let oy1 = obstacle.y;
+  let ox2 = obstacle.x + obstacle.width;
+  let oy2 = obstacle.y;
+  let ox3 = obstacle.x;
+  let oy3 = obstacle.y + obstacle.height;
+  let ox4 = obstacle.x + obstacle.width;
+  let oy4 = obstacle.y + obstacle.height;
+
+  let i1 = testIfIntersects(sx,sy,cx,cy,ox1,oy1,ox2,oy2);
+  let i2 = testIfIntersects(sx,sy,cx,cy,ox1,oy1,ox3,oy3);
+  let i3 = testIfIntersects(sx,sy,cx,cy,ox2,oy2,ox4,oy4);
+  let i4 = testIfIntersects(sx,sy,cx,cy,ox3,oy3,ox4,oy4);
+
+  console.log(i1,i2,i3,i4)
+
+  if ( i1 || i2 || i3 || i4 ) {
+    playerCow.beam = false;
+  }
+
+
+  let ctx = gameArea.context;
+  ctx.strokeStyle = 'white';
+  if ( playerCow.beam == 1 ) {
+    ctx.strokeStyle = 'red';
+  }
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  ctx.moveTo(playerCow.x + playerCow.width/2, playerCow.y + playerCow.height/2);
+  ctx.lineTo(playerCow.x + playerCow.width/2 + Math.cos(playerCow.dir) * 100, playerCow.y + playerCow.height/2 + Math.sin(playerCow.dir) * 100);
+  ctx.stroke();
+}
+
+// yes, i took this off of stackoverflow, don't judge me
+function testIfIntersects(a,b,c,d,p,q,r,s) {
+  let det, gamma, lambda;
+  det = (c - a) * (s - q) - (r - p) * (d - b);
+  if (det === 0) {
+    return false;
+  } else {
+    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+    return (-0.01 < lambda && lambda < 1.01) && (-0.01 < gamma && gamma < 1.01);
+  }
+};
+
+
 function testIfOutOfBounds(thingie) {
   if (thingie.x <= 0) {
     thingie.x = 0;
@@ -290,11 +362,19 @@ function testIfOutOfBounds(thingie) {
 }
 
 
+
+function testIfObstacleVisible(obstacle) {
+  if ( obstacle.y > gameArea.canvas.height ) {
+    obstacle.visible = 0;
+  }
+}
+
 function obstacle(x, y, width, height, img) {
   this.x = x;
   this.y = y;
-  this.width = cloudWidht;
-  this.height = cloudHeight;
+  this.width = width;
+  this.height = height;
+  this.visible = 1;
   this.img = img;
 
   this.draw = function() {
