@@ -8,6 +8,11 @@ const frameLength = 10;
 const saucerWidth = 120;
 const saucerRatio = 754/538;
 const saucerHeight = saucerWidth / saucerRatio;
+
+const cloudWidht = 120;
+const cloudRatio = 972/620;
+const cloudHeight = cloudWidht / cloudRatio;
+
 const beamRatio = 754/1381;
 const beamHeight = saucerHeight / 538 * 1381;
 const beamRotateCenter = 242/1381 * saucerHeight;
@@ -57,12 +62,22 @@ function gameLoop() {
   playerSaucer.update();
   playerCow.update();
 
+
   currentFrame += 1;
 
   if ( currentFrame % 60 == 0 ) {
+
+
+    let n = Math.ceil((Math.random() / 2) * 10);
+    let cloudImg = document.getElementById("cloud" + n);
+
+    // gameArea.context.fillStyle = color;
+    // gameArea.context.fillRect(this.x, this.y, this.width, this.height);
+
     let obstacleX = Math.floor( Math.random() * ( gameArea.canvas.width/2 - obstacleWidth ) );
-    gameObstacles.push( new obstacle( (obstacleX + ( currentSide % 2 * gameArea.canvas.width/2 ) ), -200, obstacleWidth, 25) );
+    gameObstacles.push( new obstacle( (obstacleX + ( currentSide % 2 * gameArea.canvas.width/2 ) ), -200, obstacleWidth, 25, cloudImg) );
     currentSide += 1;
+
   }
 
   // go through every obstacle to move & draw it
@@ -347,23 +362,25 @@ function testIfOutOfBounds(thingie) {
 }
 
 
+
 function testIfObstacleVisible(obstacle) {
   if ( obstacle.y > gameArea.canvas.height ) {
     obstacle.visible = 0;
   }
 }
 
-function obstacle(x, y, width, height) {
+function obstacle(x, y, width, height, img) {
   this.x = x;
   this.y = y;
   this.width = width;
   this.height = height;
   this.visible = 1;
+  this.img = img;
 
   this.draw = function() {
-    gameArea.context.fillStyle = "white";
-    gameArea.context.fillRect(this.x, this.y, this.width, this.height);
+    gameArea.context.drawImage(this.img, this.x,  this.y, this.width, this.height);
   }
+
 }
 
 // TODO eztmegcsinalni
