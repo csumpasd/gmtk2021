@@ -9,7 +9,7 @@ const saucerWidth = 120;
 const saucerRatio = 754/538;
 const saucerHeight = saucerWidth / saucerRatio;
 
-const cloudWidht = 120;
+const cloudWidht = 200;
 const cloudRatio = 972/620;
 const cloudHeight = cloudWidht / cloudRatio;
 
@@ -168,18 +168,6 @@ function saucer(x, y, keys) {
       // ctx.restore();
 
 
-<<<<<<< HEAD
-      // let beamImgId = "saucer" + Math.floor( ( saucerDistance - 60 ) / beamSegment / 2) * 2;
-      // let beamImg = document.getElementById(beamImgId);
-      // //
-      // // console.log(beamImgId, beamImg);
-      //
-      // ctx.save();
-      // ctx.translate(playerSaucer.xc,playerSaucer.yc);
-      // ctx.rotate(playerCow.dir + Math.PI / 2);
-      // ctx.drawImage(beamImg, -saucerWidth/2, -saucerHeight/2, saucerWidth, beamHeight);
-      // ctx.restore();
-=======
       let beamImgId = "saucer2"; //if something goes wrong, this should be a backup
 
       let beamSize = Math.min(14, Math.floor( ( saucerDistance - 60 ) / beamSegment / 2 * 0.6 + 1) * 2 );
@@ -192,7 +180,6 @@ function saucer(x, y, keys) {
       ctx.rotate(playerCow.dir + Math.PI / 2);
       ctx.drawImage(beamImg, -saucerWidth/2, -saucerHeight/2, saucerWidth, beamHeight);
       ctx.restore();
->>>>>>> 007c7fc53cc82dfe83bdd544fcf62a020322b7b7
     }
     else {
       ctx.drawImage(saucerImgOff, playerSaucer.x, playerSaucer.y, saucerWidth, saucerHeight);
