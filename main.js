@@ -135,6 +135,7 @@ function saucer(x, y, keys) {
     this.x += this.vx;
     this.y += this.vy;
 
+
     testIfOutOfBounds(this);
     let ctx = gameArea.context;
     let saucerImgOff = document.getElementById("saucer");
@@ -152,10 +153,12 @@ function saucer(x, y, keys) {
       // ctx.restore();
 
 
-      let beamImgId = "saucer" + Math.floor( ( saucerDistance - 60 ) / beamSegment / 2) * 2;
+      let beamImgId = "saucer2"; //if something goes wrong, this should be a backup
+
+      let beamSize = Math.min(14, Math.floor( ( saucerDistance - 60 ) / beamSegment / 2 * 0.6 + 1) * 2 );
+
+      beamImgId = "saucer" + Math.max( 2, beamSize );
       let beamImg = document.getElementById(beamImgId);
-      //
-      // console.log(beamImgId, beamImg);
 
       ctx.save();
       ctx.translate(playerSaucer.xc,playerSaucer.yc);
