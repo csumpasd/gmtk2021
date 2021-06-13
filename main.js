@@ -1,4 +1,4 @@
-let gameSize = Math.min(880, (0.8 * Math.min(window.innerWidth, window.innerHeight * 0.7)));
+let gameSize = Math.min(880, (0.7 * Math.min(window.innerWidth, window.innerHeight * 0.7)));
 let obstacleSpeed = 2;
 const obstacleWidth = 150;
 const playerSpeed = 20;
@@ -75,6 +75,13 @@ function gameLoop() {
   if ( gameStarted ) {
     gameAudio.play();
 
+    let ctx = gameArea.context;
+    ctx.fillStyle = "grey";
+    ctx.textAlign = "left";
+    ctx.font = "30px Arial";
+    ctx.fillText(Math.floor(currentFrame/10 * obstacleSpeed/10), 10, 35);
+
+
     currentFrame += 1;
     playerCow.timeSinceCloud += 1;
 
@@ -122,7 +129,10 @@ function gameLoop() {
     ctx.font = "30px Arial";
     ctx.fillText("You let your cow die", gameArea.canvas.width/2, gameArea.canvas.height/2);
     ctx.font = "20px Arial";
-    ctx.fillText("(and also lost the game)", gameArea.canvas.width/2, gameArea.canvas.height/2 + 40);
+    ctx.fillText("(and also lost the game)", gameArea.canvas.width/2, gameArea.canvas.height/2 + 25);
+    ctx.font = "18px Arial";
+    ctx.fillText("your final score is:" + Math.floor(currentFrame/10 * obstacleSpeed/10), gameArea.canvas.width/2, gameArea.canvas.height/2 + 48);
+
     clearInterval(gameArea.interval);
   }
 
