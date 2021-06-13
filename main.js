@@ -1,4 +1,4 @@
-let gameSize = Math.min(880, (0.7 * Math.min(window.innerWidth, window.innerHeight)));
+let gameSize = Math.min(880, (0.7 * Math.min(window.innerWidth, window.innerHeight * 0.8)));
 let obstacleSpeed = 2;
 const obstacleWidth = 150;
 const playerSpeed = 20;
@@ -35,6 +35,7 @@ let closestObstacle = 0;
 let closestDistance;
 let minDistance;
 let gameStarted = false;
+let gameFailed = false;
 
 // called on body load
 function init() {
@@ -111,6 +112,18 @@ function gameLoop() {
       }
     }
 
+  }
+
+  if ( gameFailed ) {
+    gameAudio.pause();
+    let ctx = gameArea.context;
+    ctx.fillStyle = "red";
+    ctx.textAlign = "center";
+    ctx.font = "60px Arial";
+    ctx.fillText("You let your cow die", gameArea.canvas.width/2, gameArea.canvas.height/2);
+    ctx.font = "30px Arial";
+    ctx.fillText("(and also lost the game)", gameArea.canvas.width/2, gameArea.canvas.height/2 + 40);
+    clearInterval(gameArea.interval);
   }
 
 }
@@ -272,6 +285,10 @@ function cow(x, y) {
 
     if ( ( this.y >= gameSize * 0.84 ) && (currentFrame <= 160) ) {
       this.y = gameSize * 0.84;
+    }
+
+    if ( this.y > gameArea.canvas.height ) {
+      gameFailed = true;
     }
     // vector tests
 
