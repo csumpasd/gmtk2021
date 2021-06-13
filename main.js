@@ -1,4 +1,4 @@
-let gameSize = Math.min(880, (0.7 * Math.min(window.innerWidth, window.innerHeight * 0.8)));
+let gameSize = Math.min(880, (0.8 * Math.min(window.innerWidth, window.innerHeight * 0.7)));
 let obstacleSpeed = 2;
 const obstacleWidth = 150;
 const playerSpeed = 20;
