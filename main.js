@@ -1,4 +1,6 @@
 let gameSize = Math.min(880, (0.7 * Math.min(window.innerWidth, window.innerHeight * 0.7)));
+let mooAudio = new Audio("sounds/moo.mp3");
+
 let obstacleSpeed = 2;
 const obstacleWidth = 150;
 const playerSpeed = 20;
@@ -72,6 +74,14 @@ function gameLoop() {
   playerSaucer.update();
   playerCow.update();
 
+  let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.xc - playerCow.xc, 2) + Math.pow(playerSaucer.yc - playerCow.yc, 2)));
+  if (  ( saucerDistance <= gameSize / 3 ) && ( playerCow.y - playerSaucer.yc >= -5 ) && ( playerCow.timeSinceCloud >= beamTimeOut / frameLength * 1000 ) ) {
+    beamAudio.play();
+  }
+  else {
+    beamAudio.pause();
+  }
+
   if ( gameStarted ) {
     gameAudio.play();
 
@@ -99,6 +109,12 @@ function gameLoop() {
       gameObstacles.push( new obstacle( (obstacleX + ( currentSide % 2 * gameArea.canvas.width/2 - cloudWidth/2) ), -200, cloudWidth, cloudHeight, cloudImg) );
       currentSide += 1;
 
+    }
+
+    if ( currentFrame % 10 == 0 ) {
+      if ( Math.random() >= 0.99 ) {
+        mooAudio.play();
+      }
     }
 
 
@@ -400,7 +416,15 @@ window.addEventListener("keyup",
   },
 false);
 
+
+
 let gameAudio = new Audio("sounds/cowfinity_track.mp3");
+gameAudio.addEventListener("ended", function() {
+  this.currentTime = 0;
+  this.play();
+}, false);
+
+let beamAudio = new Audio("sounds/saucer_beam.mp3");
 gameAudio.addEventListener("ended", function() {
   this.currentTime = 0;
   this.play();
