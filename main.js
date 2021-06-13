@@ -1,24 +1,28 @@
-const obstacleSpeed = 2;
+let gameSize = Math.min(1080, (0.7 * Math.min(window.innerWidth, window.innerHeight)));
+let obstacleSpeed = 2;
 const obstacleWidth = 150;
-const playerSpeed = 10;
-const playerAccel = 0.3;
+const playerSpeed = 20;
+const playerAccel = 0.4;
 const friction = 0.985;
-const frameLength = 10;
+const frameLength = 16.66666;
+const beamTimeOut = 1;
+const cloudRarity = 15;
+const gameSpeedUp = 0.05;
 
-const saucerWidth = 120;
+const saucerWidth = gameSize * 0.16;
 const saucerRatio = 754/538;
 const saucerHeight = saucerWidth / saucerRatio;
 
-const cloudWidht = 120;
+const cloudWidth = gameSize * 0.12;
 const cloudRatio = 972/620;
-const cloudHeight = cloudWidht / cloudRatio;
+const cloudHeight = cloudWidth / cloudRatio;
 
 const beamRatio = 754/1381;
 const beamHeight = saucerHeight / 538 * 1381;
 const beamRotateCenter = 242/1381 * saucerHeight;
 const beamSegment = 122/1381 * saucerHeight;
 
-const cowWidth = 75;
+const cowWidth = gameSize * 0.13;
 const cowRatio = 160/102;
 const cowHeight = cowWidth / cowRatio;
 
@@ -27,12 +31,17 @@ const wasdKeys = [87, 65, 83, 68]; //wasd keycodes for use with if ( held [] )
 let gameObstacles = [];
 let currentFrame = 0;
 let currentSide = 0;
+let closestObstacle = 0;
+let closestDistance;
+let minDistance;
+let gameStarted = false;
 
 // called on body load
 function init() {
-  playerSaucer = new saucer(window.innerWidth/2 - saucerWidth/2 , 300, wasdKeys);
-  playerCow = new cow(window.innerWidth/2 - cowWidth/2, window.innerHeight * 0.9 -700 - cowHeight/2);
-  gameArea.init();  ///////////////////////////////////////////////////////////////////////////////////
+  playerSaucer = new saucer(gameSize/2 - saucerWidth/2 , 100, wasdKeys);
+  playerCow = new cow(gameSize/2 - cowWidth/2, gameSize * 0.9 - cowHeight/2);
+  cowField = new ground();
+  gameArea.init();  ///////////////////////////////////////////////////////////////////////////////////TODO
 }
 
 
@@ -40,14 +49,13 @@ function init() {
 let gameArea = {
   canvas : document.createElement("canvas"),
   init : function() {
-    this.canvas.width = window.innerWidth - window.innerWidth * 0.02;
-    this.canvas.height = window.innerHeight - window.innerWidth * 0.02;
+    this.canvas.width = gameSize;
+    this.canvas.height = gameSize;
 
     this.context = this.canvas.getContext("2d");
     document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 
     this.interval = setInterval(gameLoop, frameLength);
-
   },
   clear : function() {
     this.context.fillStyle = "#60a5ea";
@@ -59,39 +67,51 @@ let gameArea = {
 // called every frame
 function gameLoop() {
   gameArea.clear();
+  cowField.update();
   playerSaucer.update();
   playerCow.update();
 
-
-  currentFrame += 1;
-
-  if ( currentFrame % 60 == 0 ) {
+  if ( gameStarted ) {
 
 
-    let n = Math.ceil((Math.random() / 2) * 10);
-    let cloudImg = document.getElementById("cloud" + n);
+    currentFrame += 1;
+    playerCow.timeSinceCloud += 1;
 
-    // gameArea.context.fillStyle = color;
-    // gameArea.context.fillRect(this.x, this.y, this.width, this.height);
+    if ( currentFrame % 10 == 0 ) {
+      obstacleSpeed += gameSpeedUp;
+    }
 
-    let obstacleX = Math.floor( Math.random() * ( gameArea.canvas.width/2 - obstacleWidth ) );
-    gameObstacles.push( new obstacle( (obstacleX + ( currentSide % 2 * gameArea.canvas.width/2 ) ), -200, obstacleWidth, 25, cloudImg) );
-    currentSide += 1;
+    if ( currentFrame % Math.max(1, Math.floor(cloudRarity * 2000 / Math.sqrt(obstacleSpeed) / gameArea.canvas.width) ) == 0 ) {
 
-  }
 
-  // go through every obstacle to move & draw it
-  for ( i = 0; i < gameObstacles.length; i += 1 ) {
+      let randomCloud = Math.ceil(Math.random() * 5);
+      let cloudImg = document.getElementById("cloud" + randomCloud);
 
-    if ( gameObstacles[i].visible == 1 ) {
-      testIfObstacleVisible(gameObstacles[i]);
-      gameObstacles[i].y += obstacleSpeed;
-      gameObstacles[i].draw();
+      let obstacleX = Math.floor( Math.random() * ( gameArea.canvas.width/2 ) );
+      gameObstacles.push( new obstacle( (obstacleX + ( currentSide % 2 * gameArea.canvas.width/2 - cloudWidth/2) ), -200, cloudWidth, cloudHeight, cloudImg) );
+      currentSide += 1;
+
+    }
+
+
+    minDistance = 100000000000;
+    // go through every obstacle to move & draw it
+    for ( i = 0; i < gameObstacles.length; i += 1 ) {
+
+      if ( gameObstacles[i].visible == 1 ) {
+        obstacleDistance = (Math.sqrt(Math.pow(playerSaucer.xc - ( gameObstacles[i].x + gameObstacles[i].width/2), 2) + Math.pow(playerSaucer.yc - ( gameObstacles[i].y + gameObstacles[i].height/2), 2)));
+        if ( obstacleDistance < minDistance ) {
+          minDistance = obstacleDistance;
+          closestObstacle = i;
+        }
+
+        gameObstacles[i].testIfVisible();
+        gameObstacles[i].y += obstacleSpeed;
+        gameObstacles[i].draw();
+      }
     }
 
   }
-
-
 
 }
 
@@ -167,7 +187,7 @@ function saucer(x, y, keys) {
     }
 
     let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.xc - playerCow.xc, 2) + Math.pow(playerSaucer.yc - playerCow.yc, 2)));
-    if ( ( playerCow.y - playerSaucer.yc >= -5 ) && ( saucerDistance <= 300 ) ) {
+    if ( ( playerCow.y - playerSaucer.yc >= -5 ) && ( saucerDistance <= 300 ) && ( playerCow.timeSinceCloud >= beamTimeOut / frameLength * 1000 ) ) {
       // ctx.save();
       // ctx.translate(playerSaucer.xc,playerSaucer.yc);
       // ctx.rotate(playerCow.dir + Math.PI / 2);
@@ -206,6 +226,7 @@ function cow(x, y) {
   this.vel = 0;
   this.grav = 0;
   this.beam = false;
+  this.timeSinceCloud = beamTimeOut / frameLength * 1000;
 
   this.update = function() {
 
@@ -217,13 +238,22 @@ function cow(x, y) {
     this.dir = Math.atan2(dirY, dirX);
     let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.xc - playerCow.xc, 2) + Math.pow(playerSaucer.yc - playerCow.yc, 2)));
 
-    for ( i = 0; i < gameObstacles.length; i += 1 ) {
-      testBeamIntersects(gameObstacles[i]);
+
+    // if ( gameObstacles.length >= 1 ) {
+    //   testBeamIntersects(gameObstacles[closestObstacle]);
+    // }
+
+    if ( ( minDistance <= playerSaucer.width / 2 ) && ( gameStarted ) ) {
+      this.timeSinceCloud = 0;
     }
 
-    if ( ( saucerDistance <= 300 ) && ( saucerDistance >= 70 ) && ( playerCow.y - playerSaucer.yc >= 15 ) ) {
-        this.vel = 2 * saucerDistance/100;
+
+    if ( ( saucerDistance <= gameSize / 3 ) && ( saucerDistance >= gameSize / 11 ) && ( playerCow.y - playerSaucer.yc >= 15 ) && ( this.timeSinceCloud >= beamTimeOut / frameLength * 1000 ) ) {
+        this.vel = 3 * saucerDistance/100;
         this.beam = true;
+        if ( this.y <= gameSize * 0.67 ) {
+          gameStarted = true;
+        }
     }
     else {
       this.vel /= 1.1;
@@ -238,18 +268,23 @@ function cow(x, y) {
     this.y += velY;
 
     if ( this.beam == false ) {
-      this.grav += 0.05;
+      this.grav += gameSize * 0.00005;
       this.y += this.grav;
     }
     else {
       this.grav = 0;
     }
 
-    let ctx = gameArea.context;
-    ctx.strokeStyle = 'white';
-    if ( this.beam == 1 ) {
-      ctx.strokeStyle = 'red';
+    if ( ( this.y >= gameSize * 0.84 ) && (currentFrame <= 160) ) {
+      this.y = gameSize * 0.84;
     }
+    // vector tests
+
+    // let ctx = gameArea.context;
+    // ctx.strokeStyle = 'white';
+    // if ( this.beam == 1 ) {
+    //   ctx.strokeStyle = 'red';
+    // }
     // ctx.lineWidth = 5;
     // ctx.beginPath();
     // ctx.moveTo(playerCow.x + playerCow.width/2, playerCow.y + playerCow.height/2);
@@ -272,76 +307,6 @@ function cow(x, y) {
 
 
 
-function drawCircle(thingie) {
-  let ctx = gameArea.context;
-  ctx.beginPath();
-  ctx.arc(thingie.x+(thingie.width / 2), thingie.y+(thingie.width / 2), (thingie.width / 2), 0, 2 * Math.PI);
-  ctx.fillStyle = "white";
-  ctx.fill();
-}
-
-
-function testBeamIntersects(obstacle) {
-  let dirX = (playerSaucer.xc - playerCow.xc) * 0.5;
-  let dirY = (playerSaucer.yc - playerCow.yc) * 0.5;
-  let saucerDistance = (Math.sqrt(Math.pow(playerSaucer.xc - playerCow.xc, 2) + Math.pow(playerSaucer.yc - playerCow.yc, 2)));
-
-
-  let sx = playerSaucer.xc;
-  let sy = playerSaucer.yc;
-
-  let cx = playerCow.xc;
-  let cy = playerCow.yc;
-
-  // 1 2
-  // 3 4
-  let ox1 = obstacle.x;
-  let oy1 = obstacle.y;
-  let ox2 = obstacle.x + obstacle.width;
-  let oy2 = obstacle.y;
-  let ox3 = obstacle.x;
-  let oy3 = obstacle.y + obstacle.height;
-  let ox4 = obstacle.x + obstacle.width;
-  let oy4 = obstacle.y + obstacle.height;
-
-  let i1 = testIfIntersects(sx,sy,cx,cy,ox1,oy1,ox2,oy2);
-  let i2 = testIfIntersects(sx,sy,cx,cy,ox1,oy1,ox3,oy3);
-  let i3 = testIfIntersects(sx,sy,cx,cy,ox2,oy2,ox4,oy4);
-  let i4 = testIfIntersects(sx,sy,cx,cy,ox3,oy3,ox4,oy4);
-
-  console.log(i1,i2,i3,i4)
-
-  if ( i1 || i2 || i3 || i4 ) {
-    playerCow.beam = false;
-  }
-
-
-  let ctx = gameArea.context;
-  ctx.strokeStyle = 'white';
-  if ( playerCow.beam == 1 ) {
-    ctx.strokeStyle = 'red';
-  }
-  ctx.lineWidth = 5;
-  ctx.beginPath();
-  ctx.moveTo(playerCow.x + playerCow.width/2, playerCow.y + playerCow.height/2);
-  ctx.lineTo(playerCow.x + playerCow.width/2 + Math.cos(playerCow.dir) * 100, playerCow.y + playerCow.height/2 + Math.sin(playerCow.dir) * 100);
-  ctx.stroke();
-}
-
-// yes, i took this off of stackoverflow, don't judge me
-function testIfIntersects(a,b,c,d,p,q,r,s) {
-  let det, gamma, lambda;
-  det = (c - a) * (s - q) - (r - p) * (d - b);
-  if (det === 0) {
-    return false;
-  } else {
-    lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
-    gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
-    return (-0.01 < lambda && lambda < 1.01) && (-0.01 < gamma && gamma < 1.01);
-  }
-};
-
-
 function testIfOutOfBounds(thingie) {
   if (thingie.x <= 0) {
     thingie.x = 0;
@@ -361,14 +326,6 @@ function testIfOutOfBounds(thingie) {
   }
 }
 
-
-
-function testIfObstacleVisible(obstacle) {
-  if ( obstacle.y > gameArea.canvas.height ) {
-    obstacle.visible = 0;
-  }
-}
-
 function obstacle(x, y, width, height, img) {
   this.x = x;
   this.y = y;
@@ -381,16 +338,30 @@ function obstacle(x, y, width, height, img) {
     gameArea.context.drawImage(this.img, this.x,  this.y, this.width, this.height);
   }
 
+  this.testIfVisible = function() {
+    if ( this.y > gameArea.canvas.height ) {
+      this.visible = 0;
+    }
+  }
+
 }
 
-// TODO eztmegcsinalni
-function ground(x, y, height) {
-  this.x = x;
-  this.y = y;
-  this.width =
-  this.height = height;
+
+function ground() {
+  this.x = 0;
+  this.y = gameArea.canvas.height - ( gameArea.canvas.height * 1688 / 2250 );
+  this.width = gameArea.canvas.width;
+  this.height = gameArea.canvas.height * 1688 / 2250;
+
+  this.update = function() {
+    let groundImg = document.getElementById("ground");
+    gameArea.context.drawImage(groundImg, this.x, gameArea.canvas.height - gameArea.canvas.width * 1688 / 2250 + currentFrame * gameSize/500, gameArea.canvas.width, (gameArea.canvas.width * 1688 / 2250));
+  }
 }
 
+
+
+//keyevents
 let held = []; // index is keycode, value is boolean storing if that key is pressed
 
 window.addEventListener("keydown",
