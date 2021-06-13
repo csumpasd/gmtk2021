@@ -11,7 +11,7 @@ body, html {
 }
 #title {
   display: flex;
-  margin-top: clamp(10px,2%,100px);
+  margin-top: 10px;
 }
 canvas {
     padding: 0;

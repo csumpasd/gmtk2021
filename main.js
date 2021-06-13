@@ -1,4 +1,4 @@
-let gameSize = Math.min(1440, (0.7 * Math.min(window.innerWidth, window.innerHeight)));
+let gameSize = Math.min(880, (0.7 * Math.min(window.innerWidth, window.innerHeight)));
 let obstacleSpeed = 2;
 const obstacleWidth = 150;
 const playerSpeed = 20;
@@ -72,7 +72,7 @@ function gameLoop() {
   playerCow.update();
 
   if ( gameStarted ) {
-
+    gameAudio.play();
 
     currentFrame += 1;
     playerCow.timeSinceCloud += 1;
@@ -94,7 +94,7 @@ function gameLoop() {
     }
 
 
-    minDistance = 100000000000;
+    minDistance = 69420;
     // go through every obstacle to move & draw it
     for ( i = 0; i < gameObstacles.length; i += 1 ) {
 
@@ -372,3 +372,9 @@ window.addEventListener("keyup",
     changeType = "u";
   },
 false);
+
+let gameAudio = new Audio("sounds/cowfinity_track.mp3");
+gameAudio.addEventListener("ended", function() {
+  this.currentTime = 0;
+  this.play();
+}, false);
